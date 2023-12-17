@@ -1,4 +1,5 @@
-﻿using System;
+﻿using classname;
+using System;
 
 namespace classname
 {
@@ -8,8 +9,8 @@ namespace classname
         public String Type { get; set; }
         public int Point { get; set; }
         public String OpeningClass { get; set; }
+        public Teacher Tutor { get; set; }
 
-        Teacher Tutor { get; set; }
         public Course(Teacher tutor)
         {
             Tutor = tutor;
@@ -17,7 +18,7 @@ namespace classname
 
         public override string ToString()
         {
-            return $"{CourseName}({Type} : {Point}學分)";
+            return $"{CourseName} {Type} {Point} {OpeningClass}";
         }
     }
 }

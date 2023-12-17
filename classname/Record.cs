@@ -7,14 +7,9 @@ namespace classname
         public Student SelectedStudent { get; set; }
         public Course SelectedCourse { get; set; }
 
-        public bool Equals(Record record)
+        public bool Equals(Record r)
         {
-            return SelectedStudent.StudentId == record.SelectedStudent.StudentId && SelectedCourse.CourseName == record.SelectedCourse.CourseName;
-        }
-
-        public override string ToString()
-        {
-            return $"{SelectedStudent.StudentName}/{SelectedCourse.CourseName}";
+            return this.SelectedStudent.StudentId == r.SelectedStudent.StudentId && this.SelectedCourse.CourseName == r.SelectedCourse.CourseName;
         }
     }
 }

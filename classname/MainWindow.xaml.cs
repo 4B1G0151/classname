@@ -1,13 +1,11 @@
-﻿using Microsoft.Win32;
+﻿using classname;
+using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Text.Unicode;
 using System.Windows;
-using System.Windows.Input;
-using System.Windows.Media.Media3D;
 
 namespace classname
 {
@@ -21,6 +19,7 @@ namespace classname
 
         List<Course> courses = new List<Course>();
         Course selectedCourse = null;
+
         List<Teacher> teachers = new List<Teacher>();
         Teacher selectedTeacher = null;
 
@@ -29,29 +28,27 @@ namespace classname
         public MainWindow()
         {
             InitializeComponent();
-
             InitializeStudent();
-
-            InititalizeCourse();
+            InitializeCourse();
         }
 
-        private void InititalizeCourse()
+        private void InitializeCourse()
         {
-            Teacher teacher1 = new Teacher() { TeacherName = "陳定宏" };
-            teacher1.TeachingCourses.Add(new Course(teacher1) { CourseName = "視窗程式設計", OpeningClass = "五專三甲", Point = 3, Type = "必修" });
+            Teacher teacher1 = new Teacher { TeacherName = "陳定宏" };
             teacher1.TeachingCourses.Add(new Course(teacher1) { CourseName = "視窗程式設計", OpeningClass = "四技二甲", Point = 3, Type = "選修" });
             teacher1.TeachingCourses.Add(new Course(teacher1) { CourseName = "視窗程式設計", OpeningClass = "四技二乙", Point = 3, Type = "選修" });
             teacher1.TeachingCourses.Add(new Course(teacher1) { CourseName = "視窗程式設計", OpeningClass = "四技二丙", Point = 3, Type = "選修" });
+            teacher1.TeachingCourses.Add(new Course(teacher1) { CourseName = "視窗程式設計", OpeningClass = "五專三甲", Point = 3, Type = "必修" });
 
-            Teacher teacher2 = new Teacher() { TeacherName = "陳福坤" };
-            teacher2.TeachingCourses.Add(new Course(teacher2) { CourseName = "計算機概論", OpeningClass = "四技一丙", Point = 2, Type = "必修" });
-            teacher2.TeachingCourses.Add(new Course(teacher2) { CourseName = "計算機概論", OpeningClass = "四技一甲一乙", Point = 2, Type = "必修" });
-            teacher2.TeachingCourses.Add(new Course(teacher2) { CourseName = "數位系統導論", OpeningClass = "四技一乙", Point = 3, Type = "必修" });
+            Teacher teacher2 = new Teacher { TeacherName = "李宗儒" };
+            teacher2.TeachingCourses.Add(new Course(teacher2) { CourseName = "Android程式設計", OpeningClass = "五專四甲", Point = 3, Type = "選修" });
+            teacher2.TeachingCourses.Add(new Course(teacher2) { CourseName = "人工智慧與應用", OpeningClass = "博研電子一甲等合開", Point = 3, Type = "選修" });
+            teacher2.TeachingCourses.Add(new Course(teacher2) { CourseName = "動態程式語言", OpeningClass = "四技資工三甲等合開", Point = 3, Type = "選修" });
 
-            Teacher teacher3 = new Teacher() { TeacherName = "許子衡" };
-            teacher3.TeachingCourses.Add(new Course(teacher3) { CourseName = "Android程式設計", OpeningClass = "四技資工三甲等合開", Point = 3, Type = "選修" });
-            teacher3.TeachingCourses.Add(new Course(teacher3) { CourseName = "人工智慧與雲端運算", OpeningClass = "四技資工四甲等合開", Point = 3, Type = "選修" });
-            teacher3.TeachingCourses.Add(new Course(teacher3) { CourseName = "動態程式語言", OpeningClass = "五專資工三甲", Point = 3, Type = "系定選修" });
+            Teacher teacher3 = new Teacher { TeacherName = "鄧瑞哲" };
+            teacher3.TeachingCourses.Add(new Course(teacher3) { CourseName = "微積分(一)", OpeningClass = "四技資工一丙", Point = 3, Type = "必修" });
+            teacher3.TeachingCourses.Add(new Course(teacher3) { CourseName = "圖像化程式設計", OpeningClass = "五專資工一甲", Point = 2, Type = "系定選修" });
+            teacher3.TeachingCourses.Add(new Course(teacher3) { CourseName = "圖像化程式設計實習", OpeningClass = "五專資工一甲", Point = 2, Type = "系定選修" });
 
             teachers.Add(teacher1);
             teachers.Add(teacher2);
@@ -71,18 +68,30 @@ namespace classname
 
         private void InitializeStudent()
         {
-            students.Add(new Student { StudentId = "A1234567", StudentName = "陳小明" });
-            students.Add(new Student { StudentId = "A1234678", StudentName = "王小美" });
-            students.Add(new Student { StudentId = "A1234789", StudentName = "林小英" });
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "JSON 檔案 (*.json)|*.json";
 
-            cmbStudent.ItemsSource = students;
-            cmbStudent.SelectedIndex = 0;
+            if (openFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    string fileContent = File.ReadAllText(openFileDialog.FileName);
+                    students = JsonSerializer.Deserialize<List<Student>>(fileContent);
+                    cmbStudent.ItemsSource = students;
+                    cmbStudent.SelectedIndex = 0;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"讀取 JSON 檔案時發生錯誤：{ex.Message}");
+                }
+            }
         }
+
 
         private void cmbStudent_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             selectedStudent = (Student)cmbStudent.SelectedItem;
-            labelStatus.Content = $"選取學生：{selectedStudent.ToString()}";
+            labelStatus.Content = $"選取學生： {selectedStudent.ToString()}";
         }
 
         private void tvTeacher_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -90,51 +99,53 @@ namespace classname
             if (tvTeacher.SelectedItem is Teacher)
             {
                 selectedTeacher = (Teacher)tvTeacher.SelectedItem;
-                labelStatus.Content = $"選取教師：{selectedTeacher.ToString()}";
+                labelStatus.Content = $"選取老師： {selectedTeacher.ToString()}";
             }
             else if (tvTeacher.SelectedItem is Course)
             {
                 selectedCourse = (Course)tvTeacher.SelectedItem;
-                labelStatus.Content = selectedCourse.ToString();
-            }
-        }
-
-        private void btnRegister_Click(object sender, RoutedEventArgs e)
-        {
-            if (selectedStudent == null || selectedCourse == null)
-            {
-                MessageBox.Show("請選取學生或課程");
-                return;
-            }
-            else
-            {
-                Record newRecord = new Record() { SelectedStudent = selectedStudent, SelectedCourse = selectedCourse };
-
-                foreach (Record r in records)
-                {
-                    if (r.Equals(newRecord))
-                    {
-                        MessageBox.Show($"{selectedStudent.StudentName}已選取 {selectedCourse.CourseName}");
-                        return;
-                    }
-                }
-
-                records.Add(newRecord);
-                lvRecord.ItemsSource = records;
-                lvRecord.Items.Refresh();
+                labelStatus.Content = $"選取課程： {selectedCourse.ToString()}";
             }
         }
 
         private void lbCourse_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             selectedCourse = (Course)lbCourse.SelectedItem;
-            labelStatus.Content = selectedCourse.ToString();
+            labelStatus.Content = $"選取課程： {selectedCourse.ToString()}";
+        }
+
+        private void btnRegister_Click(object sender, RoutedEventArgs e)
+        {
+            if (selectedStudent == null || selectedCourse == null)
+            {
+                MessageBox.Show("請選取學生與課程");
+                return;
+            }
+            else
+            {
+                Record newRecord = new Record { SelectedStudent = selectedStudent, SelectedCourse = selectedCourse };
+
+                foreach (Record r in records)
+                {
+                    if (newRecord.Equals(r))
+                    {
+                        MessageBox.Show($"{selectedStudent.StudentName}已選取{selectedCourse.CourseName}");
+                        return;
+                    }
+                }
+                records.Add(newRecord);
+                lvRecord.ItemsSource = records;
+                lvRecord.Items.Refresh();
+            }
         }
 
         private void lvRecord_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            selectedRecord = (Record)lvRecord.SelectedItem;
-            if (selectedRecord != null) labelStatus.Content = selectedRecord.ToString();
+            if (lvRecord.SelectedItem != null)
+            {
+                selectedRecord = (Record)lvRecord.SelectedItem;
+                labelStatus.Content = $"選取紀錄： {selectedRecord.SelectedStudent.StudentName}　 {selectedRecord.SelectedCourse.CourseName}";
+            }
         }
 
         private void btnWithdrawl_Click(object sender, RoutedEventArgs e)
@@ -142,28 +153,27 @@ namespace classname
             if (selectedRecord != null)
             {
                 records.Remove(selectedRecord);
-                lvRecord.ItemsSource = records;
                 lvRecord.Items.Refresh();
             }
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
+            //開啟一個對話方塊，將records內容存成json檔，使用Microsoft所提供的Json類別
             SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "Json文件 (*.json)|*.json|All Files (*.*)|*.*";
-            saveFileDialog.Title = "儲存學生選課紀錄";
+            saveFileDialog.Filter = "JSON files (*.json)|*.json|All files (*.*)|*.*";
 
             if (saveFileDialog.ShowDialog() == true)
             {
-                JsonSerializerOptions options = new JsonSerializerOptions
+                var options = new JsonSerializerOptions
                 {
-                    Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
+                    WriteIndented = true,
                     ReferenceHandler = ReferenceHandler.Preserve,
-                    WriteIndented = true
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
                 };
 
-                string jsonString = JsonSerializer.Serialize(records, options);
-                File.WriteAllText(saveFileDialog.FileName, jsonString);
+                string json = JsonSerializer.Serialize(records, options);
+                File.WriteAllText(saveFileDialog.FileName, json);
             }
         }
     }
